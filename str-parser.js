@@ -295,7 +295,7 @@ function input(str){
 	
 	function statement(excludes){
 		excludes = new Set(excludes);
-		let name, start = index;
+		let name, start = index, result;
 		if(has("A","Z")){
 			name = keywordOrName().toString();
 		}
@@ -313,25 +313,28 @@ function input(str){
 		}
 		
 		if(statmap[name]){
-			return statmap[name]();
-		}
-		
-		//вошло имя, что за оператор принят по умолчанию?
-		skipSpace();
-		if(has("=")){
-			//Это LET,
-			return letName(name);
-		}
-		else if(has("(")){
-			return letArr(name);
-		}
-		else if(has(":")){
-			//Это метка
-			return {statname:"label", name: name};
+			result = statmap[name]();
 		}
 		else{
-			throw new Error("Unknown statement");
+			//вошло имя, что за оператор принят по умолчанию?
+			skipSpace();
+			if(has("=")){
+				//Это LET,
+				result = letName(name, start);
+			}
+			else if(has("(")){
+				result = letArr(name, start);
+			}
+			else if(has(":")){
+				//Это метка
+				result = {statname:"label", name: name};
+			}
+			else{
+				throw new Error("Unknown statement");
+			}
 		}
+		result.statpos = start; //позиция оператора в строке
+		return result;
 	}
 	
 	function keywordOrName(){
